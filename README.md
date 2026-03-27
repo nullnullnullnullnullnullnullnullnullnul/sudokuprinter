@@ -6,11 +6,11 @@ Sudoku Printer is a desktop application that generates Sudoku puzzles at selecta
 
 The application is built with a modern, modular architecture:
 
-*   **Core Algorithm (C++)**: Handles the generation of Sudoku puzzles, ensuring uniqueness and grading the difficulty correctly. Also includes the solving logic.
-*   **User Interface (Slint)**: A modern, declarative UI built using Slint, interfaced via its C++ bindings. This provides a clean and responsive user experience.
-*   **Serial Communication (C++)**: Manages the RS232 connection to the printer. It uses platform-specific APIs for optimal performance and reliability:
-    *   **Linux**: `termios`
-    *   **Windows**: Win32 API (`windows.h`)
+*   **Core Algorithm (Rust)**: Handles the generation of Sudoku puzzles, ensuring uniqueness and grading the difficulty correctly. Also includes the solving logic.
+*   **User Interface (Slint)**: A modern, declarative UI built using Slint, interfaced via its Rust bindings. This provides a clean and responsive user experience.
+*   **Serial Communication (Rust)**: Manages the RS232 connection to the printer. It uses cross-platform crates (like `serialport`) for optimal performance and reliability:
+    *   **Linux**: Uses standard POSIX termios API under the hood.
+    *   **Windows**: Uses standard Win32 API under the hood.
 *   **Printer Output Engine**: Formats the generated Sudoku grid into printer-compatible commands. It utilizes ESC/P2 raster bitmap commands for high-quality graphics formatting. If the specific graphics mode is unsupported by the printer's current state, it falls back to a clean ASCII/box-drawing character representation.
 
 ## Printer Specifications & Configuration
@@ -39,23 +39,19 @@ The application is specifically tuned for the **FutureLogic Gen2 Universal (Mode
 
 ### Prerequisites (All Platforms)
 
-*   A C++20 compatible compiler (GCC, Clang, or MSVC)
-*   CMake (ver. 3.21 or higher)
-*   [Slint Dependencies](https://slint.dev/docs/cpp/) (Rust toolchain is usually required by Slint's build process)
+*   [Rust toolchain](https://rustup.rs/) (cargo and rustc)
+*   [Slint Dependencies](https://slint.dev/docs/rust/)
 
 ### Linux (Primary Target: Arch Linux)
 
 1.  **Install Dependencies**:
     ```bash
-    sudo pacman -S base-devel cmake rust upower fontconfig
+    sudo pacman -S base-devel rust upower fontconfig
     ```
-    *(Note: `rust` is required by the Slint compiler during the build process)*
 
 2.  **Configure and Build**:
     ```bash
-    mkdir build && cd build
-    cmake ..
-    make -j$(nproc)
+    cargo build --release
     ```
 
 3.  **Serial Port Permissions**:
@@ -68,17 +64,13 @@ The application is specifically tuned for the **FutureLogic Gen2 Universal (Mode
 ### Windows
 
 1.  **Install Dependencies**:
-    *   Install [Visual Studio 2022](https://visualstudio.microsoft.com/) with the "Desktop development with C++" workload.
-    *   Install [CMake](https://cmake.org/download/).
-    *   Install [Rustup](https://rustup.rs/) (required for the Slint compiler).
+    *   Install [Rustup](https://rustup.rs/) (which includes cargo and rustc).
+    *   Make sure you have the visual C++ build tools installed (Rustup will prompt you if they are missing).
 
 2.  **Configure and Build**:
-    Open a "x64 Native Tools Command Prompt for VS 2022" and run:
+    Open a Command Prompt or PowerShell and run:
     ```cmd
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build . --config Release
+    cargo build --release
     ```
 
 3.  **Serial Port Configuration**:
