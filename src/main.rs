@@ -3,8 +3,8 @@ mod sudoku;
 fn main()
 {
     println!("Sudoku Printer Algorithm");
-    // Quick demonstration of the module
-    let grid = sudoku::generator::generate_sudoku();
-    println!("Generated basic SDK:");
+    let difficulty = sudoku::Difficulty::Hard;
+    let grid = sudoku::generator::generate_sudoku(difficulty);
+    println!("Generated Sudoku ({:?}):", difficulty);
     sudoku::print_grid(&grid);
 }

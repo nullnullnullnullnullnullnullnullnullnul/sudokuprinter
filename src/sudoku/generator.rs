@@ -2,17 +2,15 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 
 use super::solver::{count_solutions, find_empty_cell, is_safe};
-use super::{Grid, BOX_SIZE, GRID_SIZE, TOTAL_CELLS};
-
-const DEFAULT_CLUES: usize = 40;
+use super::{Difficulty, Grid, BOX_SIZE, GRID_SIZE, TOTAL_CELLS};
 
 /// Generates a valid Sudoku grid with exactly one unique solution.
-pub fn generate_sudoku() -> Grid
+pub fn generate_sudoku(difficulty: Difficulty) -> Grid
 {
     let mut grid = [[0; GRID_SIZE]; GRID_SIZE];
     fill_diagonal(&mut grid);
     random_fill(&mut grid);
-    remove_numbers(&mut grid, DEFAULT_CLUES);
+    remove_numbers(&mut grid, difficulty.target_clues());
     grid
 }
 
@@ -104,30 +102,41 @@ mod tests
     use super::*;
 
     #[test]
-    fn test_generator_validity_and_uniqueness()
+    fn test_generator_all_difficulties()
     {
-        let clues = DEFAULT_CLUES;
-        let grid = generate_sudoku();
-        let mut actual_clues = 0;
-        for r in 0..GRID_SIZE {
-            for c in 0..GRID_SIZE {
-                if grid[r][c] != 0 {
-                    actual_clues += 1;
+        let difficulties = [
+            Difficulty::Easy,
+            Difficulty::Medium,
+            Difficulty::Hard,
+            Difficulty::Expert,
+        ];
+        for &difficulty in &difficulties {
+            println!("Testing and displaying difficulty: {:?}", difficulty);
+            let clues = difficulty.target_clues();
+            let grid = generate_sudoku(difficulty);
+            let mut actual_clues = 0;
+            for r in 0..GRID_SIZE {
+                for c in 0..GRID_SIZE {
+                    if grid[r][c] != 0 {
+                        actual_clues += 1;
+                    }
                 }
             }
+            assert!(
+                actual_clues <= clues + 5,
+                "Should have around {} clues, found {}",
+                clues,
+                actual_clues
+            );
+            let mut test_grid = grid; // Copy semantic
+            assert_eq!(
+                count_solutions(&mut test_grid, 2),
+                1,
+                "Generated puzzle for {:?} doesn't have exactly 1 solution!",
+                difficulty
+            );
+            super::super::print_grid(&grid);
+            println!(""); // Add spacing between grids
         }
-        // Checks every cell once, should get exactly the target clues
-        assert!(
-            actual_clues <= clues + 5,
-            "Should have around {} clues, found {}",
-            clues,
-            actual_clues
-        );
-        let mut test_grid = grid; // Copy semantic
-        assert_eq!(
-            count_solutions(&mut test_grid, 2),
-            1,
-            "Generated puzzle doesn't have exactly 1 solution!"
-        );
     }
 }
